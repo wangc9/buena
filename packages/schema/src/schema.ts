@@ -40,3 +40,7 @@ export const UnitDataSchema = z.object({
 export const UnitArraySchema = z.object({
   units: UnitDataSchema.array().min(1),
 });
+
+export const PresignedUrlSchema = z.object({
+  contentType: z.string().min(2),
+});

@@ -22,6 +22,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { PropertyModule } from './property/property.module';
+import { FileModule } from './file/file.module';
 
 @Catch(HttpException)
 class HttpExceptionFilter extends BaseExceptionFilter {
@@ -45,6 +46,7 @@ class HttpExceptionFilter extends BaseExceptionFilter {
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     PropertyModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [
