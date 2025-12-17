@@ -24,6 +24,7 @@ import { DatabaseModule } from './database/database.module';
 import { BuildingModule } from './building/building.module';
 import { PropertyModule } from './property/property.module';
 import { FileModule } from './file/file.module';
+import { UnitModule } from './unit/unit.module';
 
 @Catch(HttpException)
 class HttpExceptionFilter extends BaseExceptionFilter {
@@ -47,6 +48,7 @@ class HttpExceptionFilter extends BaseExceptionFilter {
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     BuildingModule,
+    UnitModule,
     PropertyModule,
     FileModule,
   ],
