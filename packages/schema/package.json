@@ -1,0 +1,27 @@
+{
+  "name": "@cw/schema",
+  "type": "module",
+  "version": "1.0.0",
+  "author": "Chen Wang",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@cw/typescript-config": "*",
+    "typescript": "^5.9.3"
+  },
+  "main": "./dist/schema.js",
+  "types": "./dist/schema.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --outDir dist",
+    "dev": "tsc --watch"
+  }
+}
