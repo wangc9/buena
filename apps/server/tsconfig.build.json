@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false, // <--- THIS IS THE FIX
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {} // Keep this empty as discussed before
+  },
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  // "include": ["src/**/*"]
+}
