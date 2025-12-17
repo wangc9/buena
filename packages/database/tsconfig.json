@@ -1,0 +1,10 @@
+{
+  "extends": "@cw/typescript-config/base.json",
+  "compilterOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "declaration": true
+}
