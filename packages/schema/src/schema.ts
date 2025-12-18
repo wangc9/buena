@@ -25,6 +25,16 @@ export const BuildingArraySchema = z.object({
   buildings: BuildingDataSchema.array().min(1),
 });
 
+export const BuildingFormSchema = z.object({
+  buildings: z
+    .object({
+      ...BuildingDataSchema.omit({ house: true }).shape,
+      house: z.number().int().min(0),
+    })
+    .array()
+    .min(1),
+});
+
 export const UnitDataSchema = z.object({
   buildingId: z.uuid(),
   type: z.enum(["Apartment", "Office", "Garden", "Parking"]),

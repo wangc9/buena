@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { DialogContent } from "./ui/dialog";
 import PropertyContent from "./PropertyContent";
+import BuildingContent from "./BuildingContent";
 
 export default function PropertyDialog() {
   const [step, setStep] = useState<"property" | "building" | "unit">(
@@ -9,6 +10,12 @@ export default function PropertyDialog() {
   );
   const [propertyId, setPropertyId] = useState<string>("");
   const [propertyName, setPropertyName] = useState<string>("");
+  const [buildings, setBuildings] = useState<
+    {
+      id: string;
+      name: string;
+    }[]
+  >([]);
 
   return (
     <DialogContent className="max-h-[80vh] overflow-y-auto overflow-x-hidden">
@@ -17,6 +24,14 @@ export default function PropertyDialog() {
           setStep={setStep}
           setPropertyId={setPropertyId}
           setPropertyName={setPropertyName}
+        />
+      )}
+      {step === "building" && (
+        <BuildingContent
+          setStep={setStep}
+          propertyId={propertyId}
+          propertyName={propertyName}
+          setBuildings={setBuildings}
         />
       )}
     </DialogContent>

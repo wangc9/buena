@@ -40,7 +40,7 @@ export class PropertyService {
     return await this.db
       .insertInto('property')
       .values(values)
-      .returning(['property.id'])
+      .returning(['property.id', 'property.name'])
       .executeTakeFirstOrThrow();
   }
 }
