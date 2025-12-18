@@ -3,6 +3,7 @@ import { useState } from "react";
 import { DialogContent } from "./ui/dialog";
 import PropertyContent from "./PropertyContent";
 import BuildingContent from "./BuildingContent";
+import UnitContent from "./UnitContent";
 
 export default function PropertyDialog() {
   const [step, setStep] = useState<"property" | "building" | "unit">(
@@ -32,6 +33,13 @@ export default function PropertyDialog() {
           propertyId={propertyId}
           propertyName={propertyName}
           setBuildings={setBuildings}
+        />
+      )}
+      {step === "unit" && (
+        <UnitContent
+          setStep={setStep}
+          propertyName={propertyName}
+          buildings={buildings}
         />
       )}
     </DialogContent>
