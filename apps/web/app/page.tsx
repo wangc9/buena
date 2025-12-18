@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Logo from "@/public/buena.svg";
 import PropertyTable from "@/components/PropertyTable";
+import PropertyDialogTrigger from "@/components/PropertyDialogTrigger";
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
       </header>
       <main className="flex min-h-screen w-full max-w-3xl flex-col self-center items-center justify-between py-32 px-16">
         <PropertyTable />
+        <PropertyDialogTrigger />
       </main>
     </div>
   );
