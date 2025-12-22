@@ -9,12 +9,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import z from "zod";
-import {
-  BuildingDataSchema,
-  BuildingFormSchema,
-  UnitArraySchema,
-  UnitDataSchema,
-} from "@cw/schema";
+import { UnitArraySchema, UnitDataSchema } from "@cw/schema";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -29,11 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function UnitContent({
   setStep,
   propertyName,
   buildings,
+  setOpen,
 }: {
   setStep: Dispatch<SetStateAction<"property" | "building" | "unit">>;
   propertyName: string;
@@ -41,7 +39,9 @@ export default function UnitContent({
     id: string;
     name: string;
   }[];
+  setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
+  const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof UnitArraySchema>>({
     resolver: zodResolver(UnitArraySchema),
     defaultValues: {
@@ -80,11 +80,21 @@ export default function UnitContent({
         failedUnits,
       }: {
         successUnits: {
-          id: string;
-          name: string;
+          number: number;
         }[];
         failedUnits: z.infer<typeof UnitDataSchema>[];
       } = await result.json();
+      if (failedUnits.length > 0) {
+        toast.error(
+          `Failed to create units: ${failedUnits.map((unit) => unit.number).join(", ")}`
+        );
+        return;
+      }
+      toast.success(
+        `Successfully created units: ${successUnits.map((unit) => unit.number).join(", ")}`
+      );
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+      setOpen(false);
       setStep("property");
     } catch (error) {
       console.log(error);

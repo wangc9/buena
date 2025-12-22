@@ -18,6 +18,7 @@ import { SpinnerButton } from "./ui/SpinnerButton";
 import { Textarea } from "./ui/textarea";
 import { Trash2 } from "lucide-react";
 import { Separator } from "./ui/separator";
+import { toast } from "sonner";
 
 export default function BuildingContent({
   setStep,
@@ -79,6 +80,15 @@ export default function BuildingContent({
         }[];
         failedBuildings: z.infer<typeof BuildingDataSchema>[];
       } = await result.json();
+      if (failedBuildings.length > 0) {
+        toast.error(
+          `Failed to create buildings: ${failedBuildings.map((building) => building.name).join(", ")}`
+        );
+        return;
+      }
+      toast.success(
+        `Successfully created buildings: ${successBuildings.map((building) => building.name).join(", ")}`
+      );
       setBuildings(successBuildings);
       setStep("unit");
     } catch (error) {
