@@ -9,29 +9,33 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import z from "zod";
-import { PropertySchema } from "@cw/schema";
+import { FullPropertySchema, PropertySchema } from "@cw/schema";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import WEGIcon from "@/public/WEG.png";
 import MVIcon from "@/public/MV.png";
 import Image from "next/image";
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { SpinnerButton } from "./ui/SpinnerButton";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { CircleCheck, CircleX } from "lucide-react";
 import { Spinner } from "./ui/spinner";
+import { usePdfParser } from "@/lib/usePdfParser";
 
 export default function PropertyContent({
   setStep,
   setPropertyId,
   setPropertyName,
+  setParsedData,
 }: {
   setStep: Dispatch<SetStateAction<"property" | "building" | "unit">>;
   setPropertyId: Dispatch<SetStateAction<string>>;
   setPropertyName: Dispatch<SetStateAction<string>>;
+  setParsedData: Dispatch<
+    SetStateAction<z.infer<typeof FullPropertySchema> | null>
+  >;
 }) {
-  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof PropertySchema>>({
     resolver: zodResolver(PropertySchema),
     defaultValues: {
@@ -43,32 +47,20 @@ export default function PropertyContent({
     },
   });
 
+  const { parsePdf, isParsing } = usePdfParser((data) => {
+    setParsedData(data);
+  });
+
   async function onFileChange(e: ChangeEvent<HTMLInputElement>) {
-    setLoading(true);
     const files = e.target.files;
     if (files) {
       const file = files[0];
-      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/file`, {
-        method: "POST",
-        body: JSON.stringify({
-          contentType: file.type,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data: { url: string; key: string } = await result.json();
-      if (data.url) {
-        const s3UploadResult = await fetch(data.url, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-        if (!s3UploadResult.ok) throw new Error("S3 upload failed");
-        form.setValue("url", `${process.env.NEXT_PUBLIC_S3_URL}/${data.key}`);
+      const result = await parsePdf(file);
+
+      if (result?.url) {
+        form.setValue("url", result.url);
       }
     }
-    setLoading(false);
   }
 
   async function onSubmit(data: z.infer<typeof PropertySchema>) {
@@ -108,13 +100,16 @@ export default function PropertyContent({
                 <FieldLabel htmlFor="property-form-type">
                   Property Type
                 </FieldLabel>
-                <article className="flex items-center justify-between">
+                <article
+                  className="flex items-center justify-between"
+                  id="property-form-type"
+                >
                   <Button
-                    className={
+                    className={`transition-all duration-300 ease-in-out ${
                       field.value === "WEG"
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-blue-500"
                         : ""
-                    }
+                    }`}
                     variant="default"
                     size="icon-xl"
                     type="button"
@@ -123,11 +118,11 @@ export default function PropertyContent({
                     <Image src={WEGIcon} alt="WEG" width={150} height={150} />
                   </Button>
                   <Button
-                    className={
+                    className={`transition-all duration-300 ease-in-out ${
                       field.value === "MV"
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-blue-500"
                         : ""
-                    }
+                    }`}
                     variant="default"
                     size="icon-xl"
                     type="button"
@@ -215,7 +210,7 @@ export default function PropertyContent({
                 onChange={onFileChange}
               />
               <InputGroupAddon>
-                {loading ? (
+                {isParsing ? (
                   <Spinner />
                 ) : form.getValues("url") === "" ? (
                   <CircleX />

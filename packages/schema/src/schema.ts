@@ -17,22 +17,16 @@ export const BuildingDataSchema = z.object({
   propertyId: z.uuid(),
   name: z.string().min(2),
   street: z.string().min(2),
-  house: z.coerce.number().int().min(0),
+  house: z.number().int().min(0),
   other: z.string().min(2),
 });
 
-export const BuildingArraySchema = z.object({
-  buildings: BuildingDataSchema.array().min(1),
+export const BuildingWithTempIdSchema = BuildingDataSchema.extend({
+  tempId: z.string(),
 });
 
-export const BuildingFormSchema = z.object({
-  buildings: z
-    .object({
-      ...BuildingDataSchema.omit({ house: true }).shape,
-      house: z.number().int().min(0),
-    })
-    .array()
-    .min(1),
+export const BuildingArraySchema = z.object({
+  buildings: BuildingWithTempIdSchema.array().min(1),
 });
 
 export const UnitDataSchema = z.object({
@@ -41,16 +35,25 @@ export const UnitDataSchema = z.object({
   number: z.number().int().min(0),
   floor: z.number().int().min(-1),
   entrance: z.string().min(2),
-  size: z.number().int().min(0),
+  size: z.number().min(0),
   ownershipShare: z.string().min(2),
   year: z.number().int().min(0),
   rooms: z.number().int().min(0),
 });
 
+export const UnitWithTempIdSchema = UnitDataSchema.extend({
+  buildingTempId: z.string(),
+});
+
 export const UnitArraySchema = z.object({
-  units: UnitDataSchema.array().min(1),
+  units: UnitWithTempIdSchema.array().min(1),
 });
 
 export const PresignedUrlSchema = z.object({
   contentType: z.string().min(2),
+});
+
+export const FullPropertySchema = z.object({
+  buildings: z.array(BuildingWithTempIdSchema),
+  units: z.array(UnitWithTempIdSchema),
 });

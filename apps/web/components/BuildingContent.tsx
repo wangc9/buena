@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import z from "zod";
-import { BuildingDataSchema, BuildingFormSchema } from "@cw/schema";
+import { BuildingArraySchema, BuildingDataSchema } from "@cw/schema";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -25,6 +25,8 @@ export default function BuildingContent({
   propertyId,
   propertyName,
   setBuildings,
+  setBuildingIdMap,
+  parsedBuildings,
 }: {
   setStep: Dispatch<SetStateAction<"property" | "building" | "unit">>;
   propertyId: string;
@@ -37,19 +39,18 @@ export default function BuildingContent({
       }[]
     >
   >;
+  setBuildingIdMap: Dispatch<SetStateAction<Record<string, string>>>;
+  parsedBuildings?: z.infer<typeof BuildingArraySchema>;
 }) {
-  const form = useForm<z.infer<typeof BuildingFormSchema>>({
-    resolver: zodResolver(BuildingFormSchema),
+  const form = useForm<z.infer<typeof BuildingArraySchema>>({
+    resolver: zodResolver(BuildingArraySchema),
     defaultValues: {
-      buildings: [
-        {
-          propertyId,
-          name: "",
-          street: "",
-          house: 0,
-          other: "",
-        },
-      ],
+      buildings: parsedBuildings?.buildings
+        ? parsedBuildings?.buildings.map((building) => ({
+            ...building,
+            propertyId,
+          }))
+        : [{ propertyId, name: "", street: "", house: 0, other: "" }],
     },
   });
 
@@ -58,7 +59,7 @@ export default function BuildingContent({
     name: "buildings",
   });
 
-  async function onSubmit(data: z.infer<typeof BuildingFormSchema>) {
+  async function onSubmit(data: z.infer<typeof BuildingArraySchema>) {
     try {
       const result = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/buildings`,
@@ -80,7 +81,7 @@ export default function BuildingContent({
         }[];
         failedBuildings: z.infer<typeof BuildingDataSchema>[];
       } = await result.json();
-      if (failedBuildings.length > 0) {
+      if (failedBuildings && failedBuildings.length > 0) {
         toast.error(
           `Failed to create buildings: ${failedBuildings.map((building) => building.name).join(", ")}`
         );
@@ -90,6 +91,15 @@ export default function BuildingContent({
         `Successfully created buildings: ${successBuildings.map((building) => building.name).join(", ")}`
       );
       setBuildings(successBuildings);
+
+      const map: Record<string, string> = {};
+      data.buildings.forEach((building, index) => {
+        if (building.tempId && successBuildings[index]) {
+          map[building.tempId] = successBuildings[index].id;
+        }
+      });
+      setBuildingIdMap(map);
+
       setStep("unit");
     } catch (error) {
       console.log(error);
@@ -110,11 +120,17 @@ export default function BuildingContent({
                 onClick={() => remove(index)}
                 variant="destructive"
                 size="icon"
+                aria-label={`Remove Building ${index + 1}`}
               >
                 <Trash2 />
               </Button>
               <h4 className="text-lg font-medium">Building {index + 1}</h4>
             </article>
+
+            <input
+              type="hidden"
+              {...form.register(`buildings.${index}.tempId`)}
+            />
 
             <Controller
               name={`buildings.${index}.name`}
@@ -210,7 +226,14 @@ export default function BuildingContent({
         <article className="flex justify-center pt-4">
           <Button
             onClick={() =>
-              append({ propertyId, name: "", street: "", house: 0, other: "" })
+              append({
+                propertyId,
+                name: "",
+                street: "",
+                house: 0,
+                other: "",
+                tempId: "",
+              })
             }
           >
             Add Building

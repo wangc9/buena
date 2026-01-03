@@ -32,6 +32,8 @@ export default function UnitContent({
   propertyName,
   buildings,
   setOpen,
+  buildingIdMap,
+  parsedUnits,
 }: {
   setStep: Dispatch<SetStateAction<"property" | "building" | "unit">>;
   propertyName: string;
@@ -40,24 +42,32 @@ export default function UnitContent({
     name: string;
   }[];
   setOpen: Dispatch<SetStateAction<boolean>>;
+  buildingIdMap: Record<string, string>;
+  parsedUnits: z.infer<typeof UnitArraySchema> | null;
 }) {
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof UnitArraySchema>>({
     resolver: zodResolver(UnitArraySchema),
     defaultValues: {
-      units: [
-        {
-          buildingId: buildings[0].id,
-          type: "Apartment",
-          number: 0,
-          floor: 0,
-          entrance: "",
-          size: 0,
-          ownershipShare: "",
-          year: 0,
-          rooms: -1,
-        },
-      ],
+      units: parsedUnits?.units
+        ? parsedUnits.units.map((unit) => ({
+            ...unit,
+            buildingId: buildingIdMap[unit.buildingTempId] || buildings[0].id,
+          }))
+        : [
+            {
+              buildingId: buildings[0].id,
+              type: "Apartment",
+              number: 0,
+              floor: 0,
+              entrance: "",
+              size: 0,
+              ownershipShare: "",
+              year: 0,
+              rooms: -1,
+              buildingTempId: "",
+            },
+          ],
     },
   });
 
@@ -120,6 +130,11 @@ export default function UnitContent({
               </Button>
               <h4 className="text-lg font-medium">Building {index + 1}</h4>
             </article>
+
+            <input
+              type="hidden"
+              {...form.register(`units.${index}.buildingTempId`)}
+            />
 
             <Controller
               name={`units.${index}.buildingId`}
@@ -271,13 +286,25 @@ export default function UnitContent({
                   </FieldLabel>
                   <Input
                     {...field}
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
+                    step="any"
                     id={`unit-form-size-${index}`}
                     aria-invalid={fieldState.invalid}
                     autoComplete="off"
                     onChange={(e) => {
                       const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
+                      const valueWithDot = value.replace(",", ".");
+                      if (
+                        valueWithDot === "" ||
+                        /^-?\d*\.?\d*$/.test(valueWithDot)
+                      ) {
+                        field.onChange(valueWithDot);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value;
+                      field.onChange(parseFloat(value));
                     }}
                   />
                   {fieldState.invalid && (
@@ -375,6 +402,7 @@ export default function UnitContent({
                 ownershipShare: "",
                 year: 0,
                 rooms: -1,
+                buildingTempId: "",
               })
             }
           >

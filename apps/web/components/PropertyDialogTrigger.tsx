@@ -6,6 +6,8 @@ import PropertyContent from "./PropertyContent";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import UnitContent from "./UnitContent";
+import z from "zod";
+import { FullPropertySchema } from "@cw/schema";
 
 export default function PropertyDialogTrigger() {
   const [open, setOpen] = useState<boolean>(false);
@@ -14,6 +16,12 @@ export default function PropertyDialogTrigger() {
   );
   const [propertyId, setPropertyId] = useState<string>("");
   const [propertyName, setPropertyName] = useState<string>("");
+  const [parsedData, setParsedData] = useState<z.infer<
+    typeof FullPropertySchema
+  > | null>(null);
+  const [buildingIdMap, setBuildingIdMap] = useState<Record<string, string>>(
+    {}
+  );
   const [buildings, setBuildings] = useState<
     {
       id: string;
@@ -32,6 +40,7 @@ export default function PropertyDialogTrigger() {
             setStep={setStep}
             setPropertyId={setPropertyId}
             setPropertyName={setPropertyName}
+            setParsedData={setParsedData}
           />
         )}
         {step === "building" && (
@@ -40,6 +49,8 @@ export default function PropertyDialogTrigger() {
             propertyId={propertyId}
             propertyName={propertyName}
             setBuildings={setBuildings}
+            setBuildingIdMap={setBuildingIdMap}
+            parsedBuildings={{ buildings: parsedData?.buildings || [] }}
           />
         )}
         {step === "unit" && (
@@ -48,6 +59,8 @@ export default function PropertyDialogTrigger() {
             propertyName={propertyName}
             buildings={buildings}
             setOpen={setOpen}
+            buildingIdMap={buildingIdMap}
+            parsedUnits={{ units: parsedData?.units || [] }}
           />
         )}
       </DialogContent>

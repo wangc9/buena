@@ -61,28 +61,31 @@ export default function PropertyTable() {
     <p>Error: {error.message}</p>
   ) : (
     <section className="flex flex-col items-center justify-center w-full">
-      <Table className="overflow-x-auto md:overflow-x-hidden">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="min-w-80">ID</TableHead>
-            <TableHead className="min-w-60">Name</TableHead>
-            <TableHead className="min-w-10">Type</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="h-80 overflow-y-auto">
-          {data.pages.map((group, i) => (
-            <Fragment key={i}>
-              {group.data.map((property) => (
-                <TableRow key={property.id}>
-                  <TableCell>{property.id}</TableCell>
-                  <TableCell>{property.name}</TableCell>
-                  <TableCell>{property.type}</TableCell>
-                </TableRow>
-              ))}
-            </Fragment>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="h-[360px] w-full overflow-x-auto overflow-y-auto border rounded-md">
+        <Table className="w-full">
+          <TableHeader className="bg-background shadow-sm">
+            <TableRow>
+              <TableHead className="min-w-80">ID</TableHead>
+              <TableHead className="min-w-60">Name</TableHead>
+              <TableHead className="min-w-10">Type</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="overflow-y-auto h-[calc(100%-41px)]">
+            {data.pages.map((group, i) => (
+              <Fragment key={i}>
+                {group.data.map((property) => (
+                  <TableRow key={property.id}>
+                    <TableCell>{property.id}</TableCell>
+                    <TableCell>{property.name}</TableCell>
+                    <TableCell>{property.type}</TableCell>
+                  </TableRow>
+                ))}
+              </Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
       <Button
         onClick={() => fetchNextPage()}
         disabled={!hasNextPage || isFetching}
