@@ -25,6 +25,7 @@ import { BuildingModule } from './building/building.module';
 import { PropertyModule } from './property/property.module';
 import { FileModule } from './file/file.module';
 import { UnitModule } from './unit/unit.module';
+import { AIModule } from './ai/ai.module';
 
 @Catch(HttpException)
 class HttpExceptionFilter extends BaseExceptionFilter {
@@ -51,6 +52,7 @@ class HttpExceptionFilter extends BaseExceptionFilter {
     UnitModule,
     PropertyModule,
     FileModule,
+    AIModule,
   ],
   controllers: [AppController],
   providers: [

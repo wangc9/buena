@@ -37,10 +37,15 @@ export class PropertyService {
   }
 
   async createProperty(values: z.infer<typeof PropertySchema>) {
-    return await this.db
-      .insertInto('property')
-      .values(values)
-      .returning(['property.id', 'property.name'])
-      .executeTakeFirstOrThrow();
+    try {
+      return await this.db
+        .insertInto('property')
+        .values(values)
+        .returning(['property.id', 'property.name'])
+        .executeTakeFirstOrThrow();
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 }

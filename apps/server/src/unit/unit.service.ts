@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type db } from '@cw/database';
-import { UnitDataSchema } from '@cw/schema';
+import { UnitWithTempIdSchema } from '@cw/schema';
 import { Injectable, Inject } from '@nestjs/common';
 import { BuildingService } from 'src/building/building.service';
 import { DB_CONNECTION } from 'src/database/database.module';
@@ -12,13 +13,13 @@ export class UnitService {
     private readonly buildingService: BuildingService,
   ) {}
 
-  async createUnits(values: z.infer<typeof UnitDataSchema>[]) {
+  async createUnits(values: z.infer<typeof UnitWithTempIdSchema>[]) {
     const buildingSet = new Set();
     const failedBuildingSet = new Set();
     const successUnits: { number: number }[] = [];
-    const failedUnits: z.infer<typeof UnitDataSchema>[] = [];
+    const failedUnits: z.infer<typeof UnitWithTempIdSchema>[] = [];
     for (const unit of values) {
-      const { ownershipShare, buildingId, ...rest } = unit;
+      const { ownershipShare, buildingId, buildingTempId, ...rest } = unit;
       if (!buildingSet.has(buildingId) && !failedBuildingSet.has(buildingId)) {
         const result = await this.buildingService.getBuildingById(buildingId);
         if (result === false) {
@@ -30,16 +31,20 @@ export class UnitService {
         }
       }
 
-      const unitResult = await this.db
-        .insertInto('unit')
-        .values({
-          ...rest,
-          building_id: buildingId,
-          ownership_share: ownershipShare,
-        })
-        .returning('unit.number')
-        .executeTakeFirstOrThrow();
-      successUnits.push(unitResult);
+      try {
+        const unitResult = await this.db
+          .insertInto('unit')
+          .values({
+            ...rest,
+            building_id: buildingId,
+            ownership_share: ownershipShare,
+          })
+          .returning('unit.number')
+          .executeTakeFirstOrThrow();
+        successUnits.push(unitResult);
+      } catch (error) {
+        failedUnits.push(unit);
+      }
     }
     return { successUnits, failedUnits };
   }

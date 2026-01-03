@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { type db } from '@cw/database';
-import { BuildingDataSchema } from '@cw/schema';
+import { BuildingWithTempIdSchema } from '@cw/schema';
 import { Injectable, Inject } from '@nestjs/common';
 import { DB_CONNECTION } from 'src/database/database.module';
 import { PropertyService } from 'src/property/property.service';
@@ -22,19 +23,18 @@ export class BuildingService {
         .select('building.id')
         .where('building.id', '=', id)
         .executeTakeFirstOrThrow();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return false;
     }
   }
 
-  async createBuildings(values: z.infer<typeof BuildingDataSchema>[]) {
+  async createBuildings(values: z.infer<typeof BuildingWithTempIdSchema>[]) {
     const propertySet = new Set();
     const failedPropertySet = new Set();
     const successBuildings: { id: string; name: string }[] = [];
-    const failedBuildings: z.infer<typeof BuildingDataSchema>[] = [];
+    const failedBuildings: z.infer<typeof BuildingWithTempIdSchema>[] = [];
     for (const building of values) {
-      const { propertyId, ...rest } = building;
+      const { propertyId, tempId, ...rest } = building;
       if (!propertySet.has(propertyId) && !failedPropertySet.has(propertyId)) {
         const result = await this.propertyService.getPropertyById(propertyId);
         if (result === false) {
@@ -46,12 +46,16 @@ export class BuildingService {
         }
       }
 
-      const buildingResult = await this.db
-        .insertInto('building')
-        .values({ ...rest, property_id: propertyId })
-        .returning(['building.id', 'building.name'])
-        .executeTakeFirstOrThrow();
-      successBuildings.push(buildingResult);
+      try {
+        const buildingResult = await this.db
+          .insertInto('building')
+          .values({ ...rest, property_id: propertyId })
+          .returning(['building.id', 'building.name'])
+          .executeTakeFirstOrThrow();
+        successBuildings.push(buildingResult);
+      } catch (error) {
+        failedBuildings.push(building);
+      }
     }
     return { successBuildings, failedBuildings };
   }
