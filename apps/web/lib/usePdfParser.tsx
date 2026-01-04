@@ -1,5 +1,5 @@
 import { FullPropertySchema } from "@cw/schema";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -7,10 +7,11 @@ export function usePdfParser(
   onSuccess: (data: z.infer<typeof FullPropertySchema>) => void
 ) {
   const [isParsing, setIsParsing] = useState<boolean>(false);
+  const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const parsePdf = async (file: File) => {
     setIsParsing(true);
-    const toastId = toast.loading("Analysing document...");
+    const toastId = toast.loading("Uploading document...");
 
     try {
       const presignedUrl = await fetch(
@@ -37,7 +38,11 @@ export function usePdfParser(
         });
         if (!s3UploadResult.ok) throw new Error("S3 upload failed");
 
-        const parseResult = await fetch(
+        toast.loading("Analysing document... (This can take over a minute)", {
+          id: toastId,
+        });
+
+        const startResult = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/ai/parse`,
           {
             method: "POST",
@@ -49,25 +54,54 @@ export function usePdfParser(
             },
           }
         );
-        if (!parseResult.ok) throw new Error("Parse failed");
+        const { jobId }: { jobId: string } = await startResult.json();
 
-        const parsedData = await parseResult.json();
-        onSuccess(parsedData);
-        toast.success("Document analysed successfully.", {
-          id: toastId,
-        });
+        pollInterval.current = setInterval(async () => {
+          try {
+            const statusResult = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/ai/status/${jobId}`
+            );
+            const result = await statusResult.json();
 
+            if (result.status == "completed") {
+              clearInterval(pollInterval.current!);
+              onSuccess(result.data);
+              toast.success("Document analysed successfully.", {
+                id: toastId,
+              });
+            } else if (result.status === "failed") {
+              throw new Error(result.error);
+            }
+          } catch (error) {
+            clearInterval(pollInterval.current!);
+            toast.error("Document analysis failed.", {
+              id: toastId,
+            });
+          }
+        }, 3000);
         return {
           url: `${process.env.NEXT_PUBLIC_S3_URL}/${data.key}`,
           key: data.key,
         };
+        // if (!parseResult.ok) throw new Error("Parse failed");
+
+        // const parsedData = await parseResult.json();
+        // onSuccess(parsedData);
+        // toast.success("Document analysed successfully.", {
+        //   id: toastId,
+        // });
+
+        // return {
+        //   url: `${process.env.NEXT_PUBLIC_S3_URL}/${data.key}`,
+        //   key: data.key,
+        // };
       }
     } catch (error) {
       console.log(error);
-      toast.error("Document analysis failed.", {
+      toast.error("Upload failed.", {
         id: toastId,
       });
-      return null;
+      if (pollInterval.current) clearInterval(pollInterval.current);
     } finally {
       setIsParsing(false);
     }

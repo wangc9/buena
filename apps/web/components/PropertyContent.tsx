@@ -104,32 +104,38 @@ export default function PropertyContent({
                   className="flex items-center justify-between"
                   id="property-form-type"
                 >
-                  <Button
-                    className={`transition-all duration-300 ease-in-out ${
-                      field.value === "WEG"
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-blue-500"
-                        : ""
-                    }`}
-                    variant="default"
-                    size="icon-xl"
-                    type="button"
-                    onClick={() => field.onChange("WEG")}
-                  >
-                    <Image src={WEGIcon} alt="WEG" width={150} height={150} />
-                  </Button>
-                  <Button
-                    className={`transition-all duration-300 ease-in-out ${
-                      field.value === "MV"
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-blue-500"
-                        : ""
-                    }`}
-                    variant="default"
-                    size="icon-xl"
-                    type="button"
-                    onClick={() => field.onChange("MV")}
-                  >
-                    <Image src={MVIcon} alt="MV" width={150} height={150} />
-                  </Button>
+                  <article className="flex flex-col items-center justify-center">
+                    <p className="text-lg font-bold">WEG</p>
+                    <Button
+                      className={`transition-all duration-300 ease-in-out ${
+                        field.value === "WEG"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-blue-500"
+                          : ""
+                      }`}
+                      variant="default"
+                      size="icon-xl"
+                      type="button"
+                      onClick={() => field.onChange("WEG")}
+                    >
+                      <Image src={WEGIcon} alt="WEG" width={150} height={150} />
+                    </Button>
+                  </article>
+                  <article className="flex flex-col items-center justify-center">
+                    <p className="text-lg font-bold">MV</p>
+                    <Button
+                      className={`transition-all duration-300 ease-in-out ${
+                        field.value === "MV"
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-blue-500"
+                          : ""
+                      }`}
+                      variant="default"
+                      size="icon-xl"
+                      type="button"
+                      onClick={() => field.onChange("MV")}
+                    >
+                      <Image src={MVIcon} alt="MV" width={150} height={150} />
+                    </Button>
+                  </article>
                 </article>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

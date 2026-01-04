@@ -43,6 +43,7 @@ export class UnitService {
           .executeTakeFirstOrThrow();
         successUnits.push(unitResult);
       } catch (error) {
+        console.log(error);
         failedUnits.push(unit);
       }
     }
