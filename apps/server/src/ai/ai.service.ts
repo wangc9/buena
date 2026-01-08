@@ -64,36 +64,6 @@ export class AIService {
     await this.lambdaClient.send(command);
 
     return { jobId, status: 'pending' };
-
-    // try {
-    //   const response = await this.lambdaClient.send(command);
-
-    //   if (response.FunctionError) {
-    //     const rawError = new TextDecoder().decode(response.Payload);
-    //     console.error(
-    //       `Lambda Function Crash: ${response.FunctionError}`,
-    //       rawError,
-    //     );
-    //     throw new Error(`Lambda crashed: ${response.FunctionError}`);
-    //   }
-    //   const responsePayload = JSON.parse(
-    //     new TextDecoder().decode(response.Payload),
-    //   );
-
-    //   if (responsePayload.statusCode !== 200) {
-    //     const errorMessage = responsePayload.error || 'Unknown Lambda Error';
-
-    //     console.error(
-    //       `Lambda Execution Failed: ${JSON.stringify(errorMessage)}`,
-    //     );
-
-    //     throw new Error(`Lambda Error: ${errorMessage}`);
-    //   }
-    //   return responsePayload.body;
-    // } catch (error) {
-    //   console.error('AI Service Error:', error);
-    //   throw error;
-    // }
   }
 
   async getJobStatus(jobId: string) {

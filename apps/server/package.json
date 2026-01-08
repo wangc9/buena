@@ -76,6 +76,11 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1",
+      "^@cw/database(|/.*)$": "<rootDir>/../../../packages/database/src/$1",
+      "^@cw/schema(|/.*)$": "<rootDir>/../../../packages/schema/src/$1"
+    }
   }
 }

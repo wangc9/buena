@@ -128,7 +128,7 @@ export default function UnitContent({
               >
                 <Trash2 />
               </Button>
-              <h4 className="text-lg font-medium">Building {index + 1}</h4>
+              <h4 className="text-lg font-medium">Unit {index + 1}</h4>
             </article>
 
             <input

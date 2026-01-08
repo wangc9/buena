@@ -17,7 +17,7 @@ export default function Home() {
           />
         </div>
       </header>
-      <main className="flex min-h-screen w-full max-w-3xl flex-col self-center items-center justify-between py-32 px-16">
+      <main className="flex min-h-screen w-full max-w-3xl flex-col self-center items-center justify-between py-32 px-16 gap-y-4">
         <PropertyTable />
         <PropertyDialogTrigger />
       </main>

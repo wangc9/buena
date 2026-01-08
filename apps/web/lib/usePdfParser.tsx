@@ -83,18 +83,6 @@ export function usePdfParser(
           url: `${process.env.NEXT_PUBLIC_S3_URL}/${data.key}`,
           key: data.key,
         };
-        // if (!parseResult.ok) throw new Error("Parse failed");
-
-        // const parsedData = await parseResult.json();
-        // onSuccess(parsedData);
-        // toast.success("Document analysed successfully.", {
-        //   id: toastId,
-        // });
-
-        // return {
-        //   url: `${process.env.NEXT_PUBLIC_S3_URL}/${data.key}`,
-        //   key: data.key,
-        // };
       }
     } catch (error) {
       console.log(error);
